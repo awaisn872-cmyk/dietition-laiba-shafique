@@ -1,9 +1,4 @@
 
-/* =========================================================
-   DR. LAIBA SHAFIQUE — DIETITIAN PORTFOLIO
-   Technologies: HTML, CSS & Vanilla JavaScript
-   ========================================================= */
-
 
 /* =========================================================
    1. WEBSITE CONFIGURATION
@@ -38,8 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const navbar = document.querySelector(".navbar");
 
     const menuToggle = document.querySelector(
-        ".menu-toggle, .hamburger, #menu-toggle"
+        "#menu-toggle, .menu-toggle, .hamburger"
     );
+
+    const navMenu = document.getElementById("nav-menu");
 
     const navLinks = document.querySelectorAll(
         ".nav-links a, .navbar-links a, .nav-menu a"
@@ -49,10 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
         "#backToTop, .back-to-top"
     );
 
-    
-const appointmentForm = document.querySelector(
-    "#appointment-form, #appointmentForm, #bookingForm, .appointment-form"
-);
+    const appointmentForm = document.querySelector(
+        "#appointment-form, #appointmentForm, #bookingForm, .appointment-form"
+    );
 
 
     /* =====================================================
@@ -68,15 +64,10 @@ const appointmentForm = document.querySelector(
         if (!notification) {
 
             notification = document.createElement("div");
-
             notification.id = "siteNotification";
 
             notification.setAttribute("role", "status");
-
-            notification.setAttribute(
-                "aria-live",
-                "polite"
-            );
+            notification.setAttribute("aria-live", "polite");
 
             document.body.appendChild(notification);
         }
@@ -91,9 +82,7 @@ const appointmentForm = document.querySelector(
         clearTimeout(notification.hideTimeout);
 
         notification.hideTimeout = setTimeout(function () {
-
             notification.classList.remove("show");
-
         }, 5000);
     }
 
@@ -116,8 +105,7 @@ const appointmentForm = document.querySelector(
 
         return (
             number.length >= 10 &&
-            number.length <= 15 &&
-            !number.includes("X")
+            number.length <= 15
         );
     }
 
@@ -129,94 +117,52 @@ const appointmentForm = document.querySelector(
         return (
             "https://wa.me/" +
             number +
-            (message
-                ? "?text=" + encodeURIComponent(message)
-                : "")
+            (
+                message
+                    ? "?text=" + encodeURIComponent(message)
+                    : ""
+            )
         );
     }
 
 
     /* =====================================================
-       5. MOBILE NAVIGATION
+       5. MOBILE NAVIGATION — FIXED
+       Uses existing HTML IDs:
+       Button: #menu-toggle
+       Menu:   #nav-menu
        ===================================================== */
 
-    if (menuToggle) {
+    if (menuToggle && navMenu) {
 
-        menuToggle.addEventListener("click", function () {
+        function openMobileMenu() {
 
-            const navMenu = document.querySelector(
-                ".nav-links, .navbar-links, .nav-menu"
-            );
+            navMenu.classList.add("active");
 
-            if (!navMenu) return;
-
-            const isOpen =
-                navMenu.classList.toggle("active");
-
-            menuToggle.classList.toggle(
-                "active",
-                isOpen
-            );
+            menuToggle.classList.add("active");
 
             menuToggle.setAttribute(
                 "aria-expanded",
-                String(isOpen)
+                "true"
             );
 
-            document.body.classList.toggle(
-                "menu-open",
-                isOpen
-            );
-        });
-    }
-
-
-    // Close menu when a navigation link is clicked.
-
-    navLinks.forEach(function (link) {
-
-        link.addEventListener("click", function () {
-
-            const navMenu = document.querySelector(
-                ".nav-links, .navbar-links, .nav-menu"
+            menuToggle.setAttribute(
+                "aria-label",
+                "Close navigation menu"
             );
 
-            if (navMenu) {
-                navMenu.classList.remove("active");
+            document.body.classList.add("menu-open");
+
+            const icon = menuToggle.querySelector("i");
+
+            if (icon) {
+                icon.classList.remove("fa-bars");
+                icon.classList.add("fa-xmark");
             }
-
-            if (menuToggle) {
-
-                menuToggle.classList.remove("active");
-
-                menuToggle.setAttribute(
-                    "aria-expanded",
-                    "false"
-                );
-            }
-
-            document.body.classList.remove("menu-open");
-        });
-    });
+        }
 
 
-    // Close menu when clicking outside it.
-
-    document.addEventListener("click", function (event) {
-
-        const navMenu = document.querySelector(
-            ".nav-links, .navbar-links, .nav-menu"
-        );
-
-        if (!navMenu || !menuToggle) return;
-
-        const clickedInsideMenu =
-            navMenu.contains(event.target);
-
-        const clickedToggle =
-            menuToggle.contains(event.target);
-
-        if (!clickedInsideMenu && !clickedToggle) {
+        function closeMobileMenu() {
 
             navMenu.classList.remove("active");
 
@@ -227,9 +173,88 @@ const appointmentForm = document.querySelector(
                 "false"
             );
 
+            menuToggle.setAttribute(
+                "aria-label",
+                "Open navigation menu"
+            );
+
             document.body.classList.remove("menu-open");
+
+            const icon = menuToggle.querySelector("i");
+
+            if (icon) {
+                icon.classList.remove("fa-xmark");
+                icon.classList.add("fa-bars");
+            }
         }
-    });
+
+
+        // Open and close the mobile navigation.
+
+        menuToggle.addEventListener("click", function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isOpen =
+                menuToggle.getAttribute("aria-expanded") === "true";
+
+            if (isOpen) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        });
+
+
+        // Close the menu after clicking a navigation link.
+
+        navMenu.querySelectorAll("a").forEach(function (link) {
+
+            link.addEventListener("click", function () {
+                closeMobileMenu();
+            });
+        });
+
+
+        // Close the menu when clicking outside.
+
+        document.addEventListener("click", function (event) {
+
+            if (
+                !navMenu.contains(event.target) &&
+                !menuToggle.contains(event.target)
+            ) {
+                closeMobileMenu();
+            }
+        });
+
+
+        // Close the menu using Escape.
+
+        document.addEventListener("keydown", function (event) {
+
+            if (event.key === "Escape") {
+                closeMobileMenu();
+            }
+        });
+
+
+        // Close the mobile menu when returning to desktop width.
+
+        window.addEventListener("resize", function () {
+
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        });
+
+    } else {
+
+        console.warn(
+            "Mobile navigation elements not found. Check #menu-toggle and #nav-menu in index.html."
+        );
+    }
 
 
     /* =====================================================
@@ -241,11 +266,8 @@ const appointmentForm = document.querySelector(
         if (!navbar) return;
 
         if (window.scrollY > 50) {
-
             navbar.classList.add("scrolled");
-
         } else {
-
             navbar.classList.remove("scrolled");
         }
     }
@@ -269,8 +291,7 @@ const appointmentForm = document.querySelector(
 
             link.addEventListener("click", function (event) {
 
-                const targetId =
-                    link.getAttribute("href");
+                const targetId = link.getAttribute("href");
 
                 if (!targetId || targetId === "#") {
                     return;
@@ -279,12 +300,8 @@ const appointmentForm = document.querySelector(
                 let targetElement;
 
                 try {
-
-                    targetElement =
-                        document.querySelector(targetId);
-
+                    targetElement = document.querySelector(targetId);
                 } catch (error) {
-
                     return;
                 }
 
@@ -321,6 +338,7 @@ const appointmentForm = document.querySelector(
     if ("IntersectionObserver" in window) {
 
         const revealObserver = new IntersectionObserver(
+
             function (entries, observer) {
 
                 entries.forEach(function (entry) {
@@ -333,6 +351,7 @@ const appointmentForm = document.querySelector(
                     }
                 });
             },
+
             {
                 threshold: 0.12,
                 rootMargin: "0px 0px -40px 0px"
@@ -340,114 +359,122 @@ const appointmentForm = document.querySelector(
         );
 
         revealElements.forEach(function (element) {
-
             revealObserver.observe(element);
         });
 
     } else {
 
         revealElements.forEach(function (element) {
-
             element.classList.add("visible");
         });
     }
 
 
+    /* =====================================================
+       9. FAQ ACCORDION
+       ===================================================== */
 
-/* =====================================================
-   FAQ ACCORDION — FIXED
-   ===================================================== */
-
-const faqQuestions = document.querySelectorAll(
-    ".faq-question, .faq-header, .accordion-button"
-);
-
-faqQuestions.forEach(function (question) {
-
-    question.setAttribute("aria-expanded", "false");
-
-    const faqItem = question.closest(
-        ".faq-item, .faq-card, .accordion-item"
+    const faqQuestions = document.querySelectorAll(
+        ".faq-question, .faq-header, .accordion-button"
     );
 
-    if (!faqItem) return;
+    faqQuestions.forEach(function (question) {
 
-    const answer = faqItem.querySelector(
-        ".faq-answer, .faq-content, .accordion-body"
-    );
+        question.setAttribute("aria-expanded", "false");
 
-    if (!answer) return;
+        const faqItem = question.closest(
+            ".faq-item, .faq-card, .accordion-item"
+        );
 
-    // Initially close the answer.
-    answer.hidden = true;
-    answer.style.maxHeight = "0";
-    answer.style.overflow = "hidden";
-    answer.style.display = "block";
-    answer.style.transition = "max-height 0.3s ease";
+        if (!faqItem) return;
 
-    question.addEventListener("click", function () {
+        const answer = faqItem.querySelector(
+            ".faq-answer, .faq-content, .accordion-body"
+        );
 
-        const isOpen =
-            question.getAttribute("aria-expanded") === "true";
+        if (!answer) return;
 
-        // Close all other FAQ answers.
-        faqQuestions.forEach(function (otherQuestion) {
+        // Initially close each answer.
 
-            if (otherQuestion === question) return;
+        answer.hidden = true;
+        answer.style.maxHeight = "0";
+        answer.style.overflow = "hidden";
+        answer.style.display = "block";
+        answer.style.transition = "max-height 0.3s ease";
 
-            const otherItem = otherQuestion.closest(
-                ".faq-item, .faq-card, .accordion-item"
-            );
 
-            if (!otherItem) return;
+        question.addEventListener("click", function () {
 
-            const otherAnswer = otherItem.querySelector(
-                ".faq-answer, .faq-content, .accordion-body"
-            );
+            const isOpen =
+                question.getAttribute("aria-expanded") === "true";
 
-            otherQuestion.setAttribute(
-                "aria-expanded",
-                "false"
-            );
 
-            otherItem.classList.remove("active");
+            // Close all other FAQ answers.
 
-            if (otherAnswer) {
-                otherAnswer.style.maxHeight = "0";
-                otherAnswer.hidden = true;
+            faqQuestions.forEach(function (otherQuestion) {
+
+                if (otherQuestion === question) return;
+
+                const otherItem = otherQuestion.closest(
+                    ".faq-item, .faq-card, .accordion-item"
+                );
+
+                if (!otherItem) return;
+
+                const otherAnswer = otherItem.querySelector(
+                    ".faq-answer, .faq-content, .accordion-body"
+                );
+
+                otherQuestion.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+                otherItem.classList.remove("active");
+
+                if (otherAnswer) {
+                    otherAnswer.style.maxHeight = "0";
+                    otherAnswer.hidden = true;
+                }
+            });
+
+
+            // Toggle the selected answer.
+
+            if (isOpen) {
+
+                question.setAttribute(
+                    "aria-expanded",
+                    "false"
+                );
+
+                faqItem.classList.remove("active");
+
+                answer.style.maxHeight = "0";
+                answer.hidden = true;
+
+            } else {
+
+                question.setAttribute(
+                    "aria-expanded",
+                    "true"
+                );
+
+                faqItem.classList.add("active");
+
+                answer.hidden = false;
+                answer.style.display = "block";
+
+                answer.style.maxHeight =
+                    answer.scrollHeight + "px";
             }
         });
-
-        // Toggle the selected answer.
-        if (isOpen) {
-
-            question.setAttribute("aria-expanded", "false");
-
-            faqItem.classList.remove("active");
-
-            answer.style.maxHeight = "0";
-
-            answer.hidden = true;
-
-        } else {
-
-            question.setAttribute("aria-expanded", "true");
-
-            faqItem.classList.add("active");
-
-            answer.hidden = false;
-
-            answer.style.display = "block";
-
-            answer.style.maxHeight =
-                answer.scrollHeight + "px";
-        }
     });
-});
+
 
     /* =====================================================
        10. APPOINTMENT BOOKING FORM
-       Opens WhatsApp with the patient's appointment details.
+       Opens WhatsApp with appointment details.
        ===================================================== */
 
     if (appointmentForm) {
@@ -457,10 +484,9 @@ faqQuestions.forEach(function (question) {
             function (event) {
 
                 // Prevent the browser from reloading the page.
+
                 event.preventDefault();
 
-
-                // Read all named form fields.
                 const formData = new FormData(appointmentForm);
 
 
@@ -506,14 +532,12 @@ faqQuestions.forEach(function (question) {
 
                 // Appointment details.
 
-               
-const selectedService = getFieldValue([
-    "consultation",
-    "service",
-    "serviceType",
-    "appointmentType"
-]);
-
+                const selectedService = getFieldValue([
+                    "consultation",
+                    "service",
+                    "serviceType",
+                    "appointmentType"
+                ]);
 
                 const selectedClinic = getFieldValue([
                     "clinic",
@@ -564,11 +588,10 @@ const selectedService = getFieldValue([
                 }
 
 
-                // Accept phone numbers with spaces, dashes and brackets.
-                // Allow an optional leading + sign.
+                // Accept spaces, dashes, brackets and an optional +.
 
                 const cleanedPhone = patientPhone.replace(
-                    /[\s\-()]/g,
+                    /[\s()-]/g,
                     ""
                 );
 
@@ -583,7 +606,7 @@ const selectedService = getFieldValue([
                 }
 
 
-                // Validate WhatsApp destination number.
+                // Validate the clinic's WhatsApp number.
 
                 if (!isWhatsAppNumberValid()) {
 
@@ -681,9 +704,7 @@ const selectedService = getFieldValue([
                 );
 
 
-                const whatsappMessage =
-                    messageLines.join("\n");
-
+                const whatsappMessage = messageLines.join("\n");
 
                 const whatsappURL = getWhatsAppURL(
                     whatsappMessage
@@ -691,10 +712,8 @@ const selectedService = getFieldValue([
 
 
                 // Navigate directly to WhatsApp.
-                // This avoids common popup-blocker problems.
 
                 window.location.href = whatsappURL;
-
             }
         );
 
@@ -714,11 +733,9 @@ const selectedService = getFieldValue([
         "#whatsappButton, .whatsapp-float, .floating-whatsapp"
     );
 
-
     whatsappButtons.forEach(function (button) {
 
-        // Set the correct destination immediately.
-        // Do not wait until the click event.
+        // Set the WhatsApp destination immediately.
 
         if (
             button.tagName.toLowerCase() === "a" &&
@@ -748,11 +765,9 @@ const selectedService = getFieldValue([
             }
 
 
-            // Support both anchor links and button elements.
+            // Support anchor and button elements.
 
-            if (
-                button.tagName.toLowerCase() !== "a"
-            ) {
+            if (button.tagName.toLowerCase() !== "a") {
 
                 event.preventDefault();
 
@@ -842,6 +857,7 @@ const selectedService = getFieldValue([
     ) {
 
         const sectionObserver = new IntersectionObserver(
+
             function (entries) {
 
                 entries.forEach(function (entry) {
@@ -866,6 +882,7 @@ const selectedService = getFieldValue([
                     });
                 });
             },
+
             {
                 rootMargin: "-35% 0px -55% 0px"
             }
@@ -897,7 +914,10 @@ const selectedService = getFieldValue([
                 if (
                     fallbackImage &&
                     imageElement.src !==
-                    new URL(fallbackImage, document.baseURI).href
+                    new URL(
+                        fallbackImage,
+                        document.baseURI
+                    ).href
                 ) {
 
                     imageElement.src = fallbackImage;
@@ -943,16 +963,10 @@ const selectedService = getFieldValue([
 
             if (event.key !== "Escape") return;
 
-
-            const navMenu = document.querySelector(
-                ".nav-links, .navbar-links, .nav-menu"
-            );
-
             if (navMenu) {
 
                 navMenu.classList.remove("active");
             }
-
 
             if (menuToggle) {
 
@@ -962,8 +976,19 @@ const selectedService = getFieldValue([
                     "aria-expanded",
                     "false"
                 );
-            }
 
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Open navigation menu"
+                );
+
+                const icon = menuToggle.querySelector("i");
+
+                if (icon) {
+                    icon.classList.remove("fa-xmark");
+                    icon.classList.add("fa-bars");
+                }
+            }
 
             document.body.classList.remove("menu-open");
         }
